@@ -1,4 +1,4 @@
-# Settings file for the Key Labeler bot from https://github.com/marketplace/keywordlabeler
+# Settings file for the Keyword Labeler bot from https://github.com/marketplace/keywordlabeler
 
 # Determines if we search the title (optional). Defaults to true.
 matchTitle: true
