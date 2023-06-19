@@ -2,6 +2,7 @@ using OpenDreamShared.Compiler;
 using OpenDreamShared.Dream;
 using OpenDreamShared.Dream.Procs;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace DMCompiler.DM.Expressions {
@@ -193,6 +194,13 @@ namespace DMCompiler.DM.Expressions {
             json = null;
             DMCompiler.UnimplementedWarning(Location, $"DMM overrides for expression {GetType()} are not implemented");
             return true; //TODO
+        }
+
+        public override bool TryAsConstant([NotNullWhen(true)] out Constant? constant) {
+            if (_target is GlobalProc) {
+                return DMBuiltins.TryEvaluateConstant((GlobalProc)_target, _arguments, out constant);
+            }
+            return base.TryAsConstant(out constant);
         }
     }
 }

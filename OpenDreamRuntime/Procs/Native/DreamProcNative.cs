@@ -1,7 +1,7 @@
 ﻿using OpenDreamRuntime.Objects;
 
 namespace OpenDreamRuntime.Procs.Native {
-    static class DreamProcNative {
+    public static  class DreamProcNative {
         public static void SetupNativeProcs(IDreamObjectTree objectTree) {
             objectTree.SetGlobalNativeProc(DreamProcNativeRoot.NativeProc_abs);
             objectTree.SetGlobalNativeProc(DreamProcNativeRoot.NativeProc_alert);
