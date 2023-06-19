@@ -6,13 +6,22 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace DMCompiler.DM.Expressions {
+
+    interface IProc {
+        public string Identifier {get;}
+        public DMProc? GetProc();
+        public DMProc? GetProc(DMObject owner);
+    }
+
     // x() (only the identifier)
-    sealed class Proc : DMExpression {
+    sealed class Proc : DMExpression, IProc {
         private readonly string _identifier;
 
         public Proc(Location location, string identifier) : base(location) {
             _identifier = identifier;
         }
+
+        public string Identifier => _identifier;
 
         public override void EmitPushValue(DMObject dmObject, DMProc proc) {
             throw new CompileErrorException(Location, "attempt to use proc as value");
@@ -34,18 +43,22 @@ namespace DMCompiler.DM.Expressions {
             var procId = dmObject.GetProcs(_identifier)?[^1];
             return procId is null ? null : DMObjectTree.AllProcs[procId.Value];
         }
+
+        public DMProc? GetProc() => GetProc(null);
     }
 
     /// <remarks>
     /// This doesn't actually contain the GlobalProc itself;
     /// this is just a hopped-up string that we eventually deference to get the real global proc during compilation.
     /// </remarks>
-    sealed class GlobalProc : DMExpression {
+    sealed class GlobalProc : DMExpression, IProc {
         private readonly string _name;
 
         public GlobalProc(Location location, string name) : base(location) {
             _name = name;
         }
+
+        public string Identifier => _name;
 
         public override void EmitPushValue(DMObject dmObject, DMProc proc) {
             DMCompiler.Emit(WarningCode.InvalidReference, Location, $"Attempt to use proc \"{_name}\" as value");
@@ -64,6 +77,8 @@ namespace DMCompiler.DM.Expressions {
 
             return globalProc;
         }
+
+        public DMProc? GetProc(DMObject owner) => GetProc();
     }
 
     /// <summary>
@@ -198,7 +213,8 @@ namespace DMCompiler.DM.Expressions {
 
         public override bool TryAsConstant([NotNullWhen(true)] out Constant? constant) {
             if (_target is GlobalProc) {
-                return DMBuiltins.TryEvaluateConstant((GlobalProc)_target, _arguments, out constant);
+                if (DMObjectTree.GlobalProcs.ContainsKey(((IProc)_target).Identifier))
+                    return DMBuiltins.TryEvaluateConstant((GlobalProc)_target, _arguments, out constant);
             }
             return base.TryAsConstant(out constant);
         }
