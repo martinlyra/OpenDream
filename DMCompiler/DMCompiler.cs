@@ -83,6 +83,8 @@ namespace DMCompiler {
             TimeSpan duration = DateTime.Now - _compileStartTime;
             Console.WriteLine($"Total time: {duration.ToString(@"mm\:ss")}");
 
+            DMBuiltins.Clear();
+
             return successfulCompile;
         }
 

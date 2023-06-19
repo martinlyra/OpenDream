@@ -12,10 +12,16 @@ using OpenDreamShared.Json;
 
 namespace DMCompiler.DM {
     sealed class DMBuiltins {
-        static IDreamObjectTree NativeTree = new BuiltinObjectTree();
+        static BuiltinObjectTree NativeTree = new BuiltinObjectTree();
 
         static DMBuiltins() {
             DreamProcNative.SetupNativeProcs(NativeTree);
+        }
+
+        // This function has to be called when once done with the copy of the runtime,
+        // to not fuck the actual runtime over during tests
+        public static void Clear() {
+            NativeTree.Reset();
         }
 
         public static bool IsNativeProc(string name) => GetNativeProc(name, out _);
@@ -80,7 +86,7 @@ namespace DMCompiler.DM {
             public IDreamObjectTree.TreeEntry[] Types => throw new System.NotImplementedException();
 
             public List<DreamProc> Procs {get; private set;}
-            private Dictionary<string, int> ProcIdMap = new Dictionary<string, int>();
+            private Dictionary<string, int> ProcIdMap;
 
             public List<string> Strings => throw new System.NotImplementedException();
 
@@ -127,7 +133,12 @@ namespace DMCompiler.DM {
             public IDreamObjectTree.TreeEntry Mob {get; private set;} = null;
 
             public BuiltinObjectTree() {
+                Reset();
+            }
+
+            public void Reset() {
                 Procs = new List<DreamProc>();
+                ProcIdMap = new Dictionary<string, int>();
             }
 
             public DreamList CreateList(int size = 0) {
